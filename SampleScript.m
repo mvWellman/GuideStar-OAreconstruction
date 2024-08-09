@@ -44,7 +44,7 @@ fprintf("\n -Retardance matrices at the requested positions are reconstructed")
 % DESCRIPTIVE TEXT
 fw = 100;
 depTh = 0;
-[LHS,RHS,outStruct] = findRotAndSheathCorrectionAbsolutePaperversion(cleanCathRetTrace(sheathInR(:,:,:),fw,depTh),cleanCathRetTrace(surfR(:,:,:),fw,depTh));
+[LHS,RHS,outStruct] = findRotAndSheathCorrectionGuidestar(cleanCathRetTrace(sheathInR(:,:,:),fw,depTh),cleanCathRetTrace(surfR(:,:,:),fw,depTh));
 [LHS1,RHS1,outStruct1] = findRotAndSheathCorrectionApparent(cleanCathRetTrace(sheathInR(:,:,:),fw,depTh),cleanCathRetTrace(surfR(:,:,:),fw,depTh));
  
 %% SECTION TITLE
