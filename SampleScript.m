@@ -59,8 +59,7 @@ st.dzRange=axialRange;
 retlocGuidestar = DepthResolvedRet(MMguidestar,st);
 retlocCatheter = DepthResolvedRet(MMCatheter,st);
 %% SECTION TITLE
-% DESCRIPTIVE TEXT
-% Some visualization
+% DESCRIPTIVE TEXT Some visualization
 
 retGuidestar = squeeze(sqrt(sum(retlocGuidestar.^2,1)));
 phiGuidestar = squeeze(atan2(retlocGuidestar(2,:,:),retlocGuidestar(1,:,:)));
