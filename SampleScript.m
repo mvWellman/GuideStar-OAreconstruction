@@ -66,17 +66,13 @@ phiGuidestar = squeeze(atan2(retlocGuidestar(2,:,:),retlocGuidestar(1,:,:)));
 
 retCatheter = squeeze(sqrt(sum(retlocCatheter.^2,1)));
 phiCatheter = squeeze(atan2(retlocCatheter(2,:,:),retlocCatheter(1,:,:)));
-
-
-retVecGuidestar = signal2isolum(phiGuidestar,retGuidestar,[-pi,pi],[0,.1],'C2');
-retVecCatheter = signal2isolum(phiCatheter,retCatheter,[-pi,pi],[0,.1],'C2');
 %% SECTION TITLE
 % DESCRIPTIVE TEXT
 
 mask=Int>=75;
 mask=imfill(mask,"holes");
 
-ax1=subplot(3,2,1);
+ax1=subplot(2,2,1);
 imagesc(Int,[65,115])
 hold on
 plot(InSheathPosition,'r')
@@ -89,29 +85,19 @@ colormap(ax1,gray)
 
  
 
-ax2=subplot(3,2,2);
+ax2=subplot(2,2,2);
 imagesc(out.dop)
 title("Depolarization",'FontSize',14)
 colormap(ax2,"hot")
  
 
-ax3=subplot(3,2,3);
-imagesc(retVecGuidestar)
-title("Guide star, Retardance vector",'FontSize',14)
-
-% colormap(ax3,cmapD)
-ax4=subplot(3,2,4);
-imagesc(retVecCatheter)
-title("Catheter modelling, Retardance vector",'FontSize',14)
-
-
-ax5=subplot(3,2,5);
+ax5=subplot(2,2,3);
 imagesc(phiGuidestar.*mask)
 colormap(ax5,"hsv")
  
 title("Guide star, Optic axis",'FontSize',14)
 % colormap(ax3,cmapD)
-ax6=subplot(3,2,6);
+ax6=subplot(2,2,4);
 imagesc(phiCatheter.*mask)
 title("Catheter modelling, Optic axis",'FontSize',14)
 colormap(ax6,"hsv")
