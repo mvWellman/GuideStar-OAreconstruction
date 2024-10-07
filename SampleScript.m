@@ -7,38 +7,45 @@
 % DESCRIPTIVE TEXT
 clc
 clear
-load('Intensity.mat');
+addpath(genpath('DATA'));
+load(fullfile('DATA','Intensity.mat'))
 axialRange=1101:1800;
 imagesc(Intensity(axialRange,:))
 fprintf(" . \n . \n . \n -ACTION REQUIRED: Find the inner and outer sheath positions in the first A-line...")
 %% Sheath and sample surface segmentation
 % DESCRIPTIVE TEXT
-Str.CatheterType='LowProfile';
-Str.OuterSheath='Yes'; 
+addpath(genpath('Codes'));
+Int=Intensity(axialRange,:);
 innerSheath = 61;
 outerSheath = 108;
-Int=Intensity(axialRange,:);
-[InSheathPosition,OutSheathPosition,Surf] = CatheterSegmentation(Int,innerSheath,outerSheath,Str);
+TilenumberOfALines = 32;
+[InnerSheathPosition, OuterSheathPosition, SampleSurface] = CatheterSegmentationClean(Int,innerSheath,outerSheath, TilenumberOfALines);
 fprintf("\n -Sheath positions and sample surface are identified")
+% InnerSheathPosition= InnerSheathPosition';
+% OuterSheathPosition= OuterSheathPosition';
+
 %% LOAD SYSTEM COMPENSATION
 load('SystemCompensation.mat');
 fprintf("\n -System compensation is loaded")
 %% Reconstruction of retradance matrix M, using spectrally binned stokes vector
 % DESCRIPTIVE TEXT
-load('StokesVectors.mat')
+
+% load('StokesVectors.mat')
+load('S1.mat')
+load('S2.mat')
 dopTh=0.7;
 pstruct.fwx = 12;
 pstruct.dopTh =dopTh;
 pstruct.systemCompensation = loc;
 pstruct.axial = axialRange;
-out = RetardanceMatrix(Stokes{1,1},Stokes{1,2},pstruct);
+out = RetardanceMatrix(S1,S2,pstruct);
 fprintf("\n -Retardance Matrix MM is reconstructed")
 %% Retardanc Matrix at the sheath and sample surface positions
 % DESCRIPTIVE TEXT
 MM = out.MM;
-sheathInR = RMatrixPosition(MM,InSheathPosition);
-sheathOutR = RMatrixPosition(MM,OutSheathPosition);
-surfR = RMatrixPosition(MM,Surf);
+sheathInR = RMatrixPosition(MM,InnerSheathPosition);
+sheathOutR = RMatrixPosition(MM,OuterSheathPosition);
+surfR = RMatrixPosition(MM,SampleSurface);
 fprintf("\n -Retardance matrices at the requested positions are reconstructed")
 %% Finding correction terms
 % DESCRIPTIVE TEXT
@@ -54,7 +61,7 @@ MMguidestar= pagemtimes(permute(LHS,[1,2,4,3]),pagemtimes(MM,permute(RHS,[1,2,4,
 MMCatheter= pagemtimes(permute(LHS1,[1,2,4,3]),pagemtimes(MM,permute(RHS1,[1,2,4,3]))); 
 st.dop=out.dop;
 st.dopTh=dopTh;
-st.surf=Surf;
+st.surf=SampleSurface;
 st.dzRange=axialRange;
 retlocGuidestar = DepthResolvedRet(MMguidestar,st);
 retlocCatheter = DepthResolvedRet(MMCatheter,st);
@@ -66,6 +73,10 @@ phiGuidestar = squeeze(atan2(retlocGuidestar(2,:,:),retlocGuidestar(1,:,:)));
 
 retCatheter = squeeze(sqrt(sum(retlocCatheter.^2,1)));
 phiCatheter = squeeze(atan2(retlocCatheter(2,:,:),retlocCatheter(1,:,:)));
+
+
+% retVecGuidestar = signal2isolum(phiGuidestar,retGuidestar,[-pi,pi],[0,.1],'C2');
+% retVecCatheter = signal2isolum(phiCatheter,retCatheter,[-pi,pi],[0,.1],'C2');
 %% SECTION TITLE
 % DESCRIPTIVE TEXT
 
@@ -75,32 +86,35 @@ mask=imfill(mask,"holes");
 ax1=subplot(2,2,1);
 imagesc(Int,[65,115])
 hold on
-plot(InSheathPosition,'r')
+plot(InnerSheathPosition,'r')
 hold on
-plot(OutSheathPosition,'b')
+plot(OuterSheathPosition,'b')
 hold on
-plot(Surf,'w')
+plot(SampleSurface,'w')
 title("Intensity",'FontSize',14)
 colormap(ax1,gray)
-
+colorbar
  
 
 ax2=subplot(2,2,2);
 imagesc(out.dop)
 title("Depolarization",'FontSize',14)
 colormap(ax2,"hot")
- 
+ colorbar
 
+ PHI1=phiGuidestar.*mask;
 ax5=subplot(2,2,3);
-imagesc(phiGuidestar.*mask)
+imagesc(PHI1)
 colormap(ax5,"hsv")
- 
+ colorbar
 title("Guide star, Optic axis",'FontSize',14)
 % colormap(ax3,cmapD)
+PHI2=phiCatheter.*mask;
 ax6=subplot(2,2,4);
-imagesc(phiCatheter.*mask)
+imagesc(PHI2)
 title("Catheter modelling, Optic axis",'FontSize',14)
 colormap(ax6,"hsv")
+colorbar
  
 
 
